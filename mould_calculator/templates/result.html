@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Results - Mould Calculator{% endblock %}
+
+{% block content %}
+<div class="results-container">
+    <div class="results-card">
+        <div class="results-header">
+            <h1>Analysis Results</h1>
+            <p>Based on your uploaded data</p>
+        </div>
+
+        <div class="results-grid">
+            <div class="metric-card">
+                <h3>Temperature</h3>
+                <div class="metric-value">{{ temperature }}°C</div>
+                <div class="metric-status {{ temp_status }}">
+                    {{ temp_message }}
+                </div>
+            </div>
+            <div class="metric-card">
+                <h3>Humidity</h3>
+                <div class="metric-value">{{ humidity }}%</div>
+                <div class="metric-status {{ humidity_status }}">
+                    {{ humidity_message }}
+                </div>
+            </div>
+            
+            <div class="metric-card risk-card">
+                <h3>Mould Risk Level</h3>
+                <div class="risk-level {{ risk_class }}">
+                    {{ risk_level }}
+                </div>
+                <div class="mould-index-value">
+                    Mould Index: {{ mould_index }}
+                </div>
+                <p class="risk-message">{{ risk_message }}</p>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'uploadpage' %}" class="new-analysis-button">New Analysis</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

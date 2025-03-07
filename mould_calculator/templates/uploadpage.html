@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Upload - Mould Calculator{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <div class="upload-card">
+       
+        
+        <div class="upload-section">
+            <h1>Upload Data File</h1>
+            <p class="upload-description">Upload your temperature and humidity data</p>
+
+            <form id="upload-form" method="post" enctype="multipart/form-data" data-url="{% url 'uploadpage' %}">
+                {% csrf_token %}
+                <div class="dropzone" id="drop-zone">
+                    <p>Drag & Drop your file here</p>
+                    <p class="or-text">or</p>
+                    <button type="button" id="browse-btn" class="browse-button">Browse Files</button>
+                    <input type="file" id="file-input" name="file" accept=".csv" hidden>
+                    <p id="file-name" class="file-name"></p>
+                </div>
+
+                <button type="submit" id="submit-btn" class="calculate-button" disabled>
+                    Calculate Mold Risk
+                </button>
+                
+                <div id="upload-message" class="upload-message"></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'js/upload.js' %}"></script>
+{% endblock %}
