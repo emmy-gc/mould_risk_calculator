@@ -1,4 +1,3 @@
-
 * {
     margin: 0;
     padding: 0;
@@ -7,35 +6,59 @@
 
 body {
     font-family: 'Poppins', sans-serif;
-    line-height: 1.6;
-    background-color: #f5f5f5;
+    background: #f7fafd;
+    color: #222;
+    min-height: 100vh;
 }
 
 .navbar {
-    background-color: #1a73e8;
-    padding: 1rem 2rem;
+    background: #1a73e8;
+    color: #fff;
+    padding: 1.2rem 2rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: white;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.08);
 }
 
 .nav-brand {
-    font-size: 1.5rem;
-    font-weight: bold;
+    font-size: 1.7rem;
+    font-weight: 600;
+    letter-spacing: 1px;
 }
 
-.nav-links a {
-    color: white;
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.nav-links a, .nav-link {
+    color: #fff;
     text-decoration: none;
-    margin-left: 2rem;
-    transition: opacity 0.3s ease;
+    font-weight: 500;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
 }
 
-.nav-links a:hover {
-    opacity: 0.8;
+.nav-links a:hover, .nav-link:hover {
+    background: rgba(255,255,255,0.13);
+    color: #e3e3e3;
 }
 
+.btn-link {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    padding: 0.3rem 0.7rem;
+}
+
+/*upload page */
 .upload-container {
     max-width: 1000px;
     margin: 2rem auto;
@@ -43,15 +66,19 @@ body {
 }
 
 .upload-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #e3f0fd 0%, #f7fafd 100%);
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(26, 115, 232, 0.10);
+    border: 2px solid #b6d0f7;
     display: flex;
     min-height: 500px;
     overflow: hidden;
+    transition: box-shadow 0.3s;
 }
 
-
+.upload-card:hover {
+    box-shadow: 0 8px 32px rgba(26, 115, 232, 0.18);
+}
 
 .upload-section {
     flex: 1;
@@ -59,7 +86,6 @@ body {
     display: flex;
     flex-direction: column;
 }
-
 
 .upload-section h1 {
     color: #1a73e8;
@@ -72,21 +98,22 @@ body {
 }
 
 .dropzone {
-    border: 2px dashed #ccc;
-    border-radius: 8px;
+    border: 2px dashed #1a73e8;
+    border-radius: 12px;
     padding: 2rem;
     text-align: center;
+    background: #f7fafd;
     margin-bottom: 1.5rem;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s, background 0.3s;
     cursor: pointer;
 }
 
 .dropzone.drag-over {
-    border-color: #1a73e8;
-    background-color: rgba(26, 115, 232, 0.05);
+    border-color: #1557b0;
+    background: #e3f0fd;
 }
 
-
+/*resultspage */
 .results-container {
     max-width: 1000px;
     margin: 2rem auto;
@@ -115,17 +142,17 @@ body {
 }
 
 .results-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
     gap: 2rem;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
 }
 
-.metric-card {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 1.5rem;
-    text-align: center;
+.metric-card, .risk-card {
+    flex: 1 1 250px;
+    min-width: 220px;
+    margin-bottom: 0;
+    box-shadow: 0 2px 8px rgba(26, 115, 232, 0.07);
 }
 
 .metric-card h3 {
@@ -133,11 +160,11 @@ body {
     margin-bottom: 1rem;
 }
 
-.metric-value {
+.metric-value, .risk-value {
     font-size: 2rem;
     font-weight: bold;
-    color: #333;
-    margin-bottom: 1rem;
+    color: #1a73e8;
+    margin-bottom: 0.5rem;
 }
 
 .metric-status {
@@ -147,7 +174,7 @@ body {
 }
 
 .metric-status.good {
-    background-color: #d4edda;
+    background-color: #53d872;
     color: #155724;
 }
 
@@ -163,7 +190,7 @@ body {
 
 .risk-card {
     background: linear-gradient(135deg, #1a73e8, #289cf5);
-    color: white;
+    color: #fff;
 }
 
 .risk-card h3 {
@@ -181,27 +208,49 @@ body {
     opacity: 0.9;
 }
 
-.mould-index-value {
-    font-size: 1.2rem;
-    color: white;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
+.risk-card.low {
+    background: linear-gradient(135deg, #28a745, #5cd490);
+    color: #fff;
+}
+
+.risk-card.medium {
+    background: linear-gradient(135deg, #ffc107, #fbc740);
+    color: #222;
+}
+
+.risk-card.high {
+    background: linear-gradient(135deg, #dc3545, #f37f7f);
+    color: #fff;
+}
+
+.mould-index {
+    font-size: 1.1rem;
+    color: #fff;
+    background: rgba(255,255,255,0.13);
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
     margin: 0.5rem 0;
 }
 
 .browse-button, .calculate-button {
-    background-color: #1a73e8;
-    color: white;
+    background: linear-gradient(90deg, #1a73e8 0%, #289cf5 100%);
+    color: #d98080 !important;
     border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    border-radius: 2rem;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 16px rgba(26, 115, 232, 0.10);
+    transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+    outline: none;
+    margin-bottom: 0.5rem;
 }
 
-.browse-button:hover, .calculate-button:not(:disabled):hover {
-    background-color: #1557b0;
+.browse-button:hover, .calculate-button:hover {
+    background: linear-gradient(90deg, #1557b0 0%, #1a73e8 100%);
+    color: #c1e66d !important;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 24px rgba(26, 115, 232, 0.18);
 }
 
 .calculate-button {
@@ -255,20 +304,23 @@ body {
 .upload-message {
     margin-top: 1rem;
     padding: 0.8rem;
-    border-radius: 4px;
+    border-radius: 8px;
     display: none;
+    font-size: 1rem;
 }
 
 .upload-message.error {
-    background-color: #fde8e8;
+    background: #fde8e8;
     color: #c81e1e;
     border: 1px solid #fecaca;
+    display: block;
 }
 
 .upload-message.success {
-    background-color: #def7ec;
+    background: #def7ec;
     color: #03543f;
     border: 1px solid #bcf0da;
+    display: block;
 }
 
 @media (max-width: 900px) {
@@ -286,7 +338,7 @@ body {
     }
 
     .results-grid {
-        grid-template-columns: 1fr;
+        flex-direction: column;
         gap: 1rem;
     }
 
@@ -296,8 +348,9 @@ body {
 }
 
 @media (max-width: 500px) {
-    .navbar {
+    .navbar, .footer {
         padding: 1rem;
+        border-radius: 0;
     }
 
     .nav-links a {
@@ -312,3 +365,117 @@ body {
         padding: 1.5rem;
     }
 }
+
+
+.main-content {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(26, 115, 232, 0.07);
+    min-height: 60vh;
+}
+
+
+
+
+.logo {
+    height: 32px;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+}
+
+/* responsive links on small screens */
+@media (max-width: 700px) {
+    .nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-end;
+    }
+    .main-content {
+        padding: 1rem;
+    }
+}
+
+.btn-morph.btn-warning {
+    background: linear-gradient(90deg, #ffc107 0%, #fbc740 100%);
+    color: #222 !important;
+}
+.btn-morph.btn-warning:hover, .btn-morph.btn-warning:focus {
+    background: linear-gradient(90deg, #e0a800 0%, #ffc107 100%);
+    color: #222 !important;
+}
+
+/* result page   */
+.btn-morph.big-btn {
+    font-size: 1.3rem;
+    padding: 1rem 2.5rem;
+    border-radius: 2.5rem;
+}
+
+/*  result Page colour-coding */
+.risk-card .card-body {
+    border-radius: 16px;
+    padding: 2rem 1rem;
+    transition: background 0.3s;
+}
+.risk-card.low .card-body {
+    background: linear-gradient(135deg, #1a73e8 0%, #289cf5 100%);
+    color: #fff;
+}
+.risk-card.medium .card-body {
+    background: linear-gradient(135deg, #ffc107 0%, #fbc740 100%);
+    color: #222;
+}
+.risk-card.high .card-body {
+    background: linear-gradient(135deg, #dc3545 0%, #f37f7f 100%);
+    color: #fff;
+}
+.risk-card .display-6, .risk-card .card-title, .risk-card .badge, .risk-card .small {
+    color: inherit !important;
+}
+
+.btn-morph-login {
+    background: linear-gradient(90deg, #00b894 0%, #00cec9 100%);
+    color: #fff !important;
+    border: none;
+    border-radius: 2rem;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 16px rgba(0, 190, 148, 0.10);
+    transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+    outline: none;
+}
+.btn-morph-login:hover, .btn-morph-login:focus {
+    background: linear-gradient(90deg, #00997a 0%, #00b894 100%);
+    color: #fff !important;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 8px 24px rgba(0, 190, 148, 0.18);
+}
+
+/* aboutpage*/
+.lead {
+    font-size: 1.15rem;
+    color: #6c757d;
+  }
+  
+  .image-zoom {
+    transition: transform 0.3s ease;
+  }
+  
+  .image-zoom:hover {
+    transform: scale(1.05);
+  }
+  
+  .btn-outline-primary {
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+  }
+  
+  h2 i {
+    vertical-align: middle;
+  }
+  

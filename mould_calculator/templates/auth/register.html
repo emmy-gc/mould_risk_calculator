@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Sign Up{% endblock %}
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow-lg border-0 p-4" style="max-width: 400px; width: 100%;">
+        <div class="text-center mb-4">
+            <i class="bi bi-person-plus text-primary" style="font-size: 2.5rem;"></i>
+            <h3 class="mt-2 text-primary fw-bold">Create your account</h3>
+            <p class="text-muted mb-0">Sign up to start analyzing your air quality data.</p>
+        </div>
+        <form method="post" autocomplete="on">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text and field.name != "password1" %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% if field.name == "password1" %}
+                        <div class="form-text text-muted small">
+                            <ul class="mb-1 ps-3" style="font-size: 0.95em;">
+                                <li>At least 8 characters</li>
+                                <li>Not too similar to your personal info</li>
+                                <li>Not a common password</li>
+                                <li>Not entirely numeric</li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-morph w-100 mt-2">
+                <i class="bi bi-person-check"></i> Create Account
+            </button>
+        </form>
+        <p class="text-center mt-4 mb-0 text-muted">
+            Already have an account?
+            <a href="{% url 'login' %}" class="fw-semibold text-primary text-decoration-underline">Log in</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

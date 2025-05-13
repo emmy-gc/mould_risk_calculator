@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}About the Mould Risk Calculator{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row align-items-center">
+
+    <div class="col-md-7">
+      <h2 class="text-primary fw-bold mb-3">
+        About the Mould Risk Calculator
+      </h2>
+      <p class="lead text-muted mb-4">Understanding indoor air quality for healthier living environments</p>
+      <p>
+        <strong>The Mould Risk Calculator</strong> is an interactive tool designed to assess the likelihood of mould development based on environmental conditions such as temperature and humidity. It processes time-series datasets and uses scientifically grounded models to evaluate potential mould growth over time.
+      </p>
+      <p>
+        Good air quality is essential for a healthy home. Our mould risk calculator helps you understand when your indoor environment might be at risk. Simple to use and built for everyone.
+      </p>
+      <a href="{% url 'uploadpage' %}" class="btn btn-outline-primary btn-lg mt-3">
+        <i class="bi bi-upload"></i> Start Analysis
+      </a>
+    </div>
+
+    <div class="col-md-5 text-center mt-4 mt-md-0">
+      <img src="{% static 'images/waterdrop.png' %}" alt="Mould Risk" class="img-fluid rounded shadow image-zoom" style="max-width: 85%;">
+    </div>
+  </div>
+</div>
+{% endblock %}

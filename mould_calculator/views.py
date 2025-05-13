@@ -1,20 +1,27 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from .utils import process_mold_index
-from .utils import mould_score
+from .utils import process_mold_index, mould_score
 from .forms import UploadFileForm
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from .models import MouldAnalysis
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+
 import pandas as pd
 import os
+import uuid
 
 
 def home(request):
     return render(request, 'home.html')
 
+
 def about(request):
     return render(request, 'about.html')
 
+# handling post and get requests
 def uploadpage(request):
     form = UploadFileForm()
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
@@ -25,99 +32,106 @@ def uploadpage(request):
             return JsonResponse({'error': error_message}, status=400) if is_ajax else render(request, 'uploadpage.html', {'form': form, 'error': error_message})
 
         uploaded_file = request.FILES["file"]
-
+        #save uploaded data on temporary path
         try:
-            file_path = default_storage.save(uploaded_file.name, ContentFile(uploaded_file.read())) 
-            full_path = os.path.join(default_storage.location, file_path)  
+    
+            temp_filename = f"temp/{uuid.uuid4()}_{uploaded_file.name}"
+            file_path = default_storage.save(temp_filename, ContentFile(uploaded_file.read())) 
+            full_path = os.path.join(default_storage.location, file_path)
 
-        
             df = pd.read_csv(full_path)
-            print("\nOriginal CSV columns:", df.columns.tolist())
-            print("\nFirst few rows of original data:")
-            print(df.head())
+            #  handle dynamic window based on dataset
+            mould_index, series, used_timeframe, full_data = process_mold_index(df)
 
-            default_storage.delete(file_path)
-
-            latest_mould_index = process_mold_index(df)
-            if latest_mould_index is None:
+            if mould_index is None:
                 raise ValueError("Could not calculate mould index from the provided data.")
-            
-            risk_data = mould_score(latest_mould_index, df)
+
+            risk_data = mould_score(mould_index, df)
             if risk_data is None:
                 raise ValueError("Could not assess mould risk from provided data.")
-            
-            
-            request.session['analysis_results'] = {
-                'current_temperature': float(risk_data['current_temperature']),
-                'current_humidity': float(risk_data['current_humidity']),
-                'risk_level': risk_data['risk_level'],
-                'mould_index': latest_mould_index
-            }
-            
+
+            if request.user.is_authenticated:
+                analysis = MouldAnalysis.objects.create(
+                    user=request.user,
+                    filename=uploaded_file.name,
+                    file=uploaded_file,
+                    temperature=risk_data['current_temperature'],
+                    humidity=risk_data['current_humidity'],
+                    mould_index=mould_index,
+                    risk_level=risk_data['risk_level'],
+                    risk_message=risk_data['status']
+                )
+                request.session['last_analysis_id'] = analysis.id
+            else:
+                request.session['anon_file_path'] = file_path
+
             return JsonResponse({'redirect_url': '/result'}) if is_ajax else redirect('result')
+
         except Exception as e:
             error_message = f"Error processing file: {str(e)}"
-            print("\nError processing file:", str(e))
-            print("Type of error:", type(e))
             return JsonResponse({'error': error_message}, status=500) if is_ajax else render(request, 'uploadpage.html', {'form': form, 'error': error_message})
+
     return render(request, 'uploadpage.html', {'form': form})
 
+
 def result(request):
-    if 'analysis_results' in request.session:
-        results = request.session['analysis_results']
-        
-        
-        temperature = float(results.get('current_temperature', 0))
-        if temperature < 20:
-            temp_status = "good"
-            temp_message = "Normal Temperature Range"
-        elif temperature < 25:
-            temp_status = "warning"
-            temp_message = "Elevated Temperature"
-        else:
-            temp_status = "danger"
-            temp_message = "High Temperature Risk"
+    dataset_id = request.GET.get('dataset_id')
+    df = None
+     #retrieve data based on user
+    if dataset_id and request.user.is_authenticated:
+        obj = get_object_or_404(MouldAnalysis, id=dataset_id, user=request.user)
+        df = pd.read_csv(obj.file.path)
+    elif request.user.is_authenticated and request.session.get('last_analysis_id'):
+        try:
+            analysis = MouldAnalysis.objects.get(id=request.session['last_analysis_id'], user=request.user)
+            df = pd.read_csv(analysis.file.path)
+        except Exception:
+            pass
+    elif request.session.get('anon_file_path'):
+        try:
+            file_path = os.path.join(default_storage.location, request.session['anon_file_path'])
+            df = pd.read_csv(file_path)
+        except Exception:
+            pass
 
-       
-        humidity = float(results.get('current_humidity', 0))
-        if humidity < 60:
-            humidity_status = "good"
-            humidity_message = "Normal Humidity Range"
-        elif humidity < 70:
-            humidity_status = "warning"
-            humidity_message = "Elevated Humidity"
-        else:
-            humidity_status = "danger"
-            humidity_message = "High Humidity Risk"
+    if df is None:
+        return redirect('uploadpage')
 
-       
-        risk_level = results.get('risk_level', 'Unknown')
-        mould_index = results.get('mould_index',0)
-        
-        if risk_level.lower() == 'low':
-            risk_class = 'low'
-            risk_message = "Low risk of mould growth"
-        elif risk_level.lower() == 'medium':
-            risk_class = 'medium'
-            risk_message = "Moderate risk - monitor conditions"
-        else:
-            risk_class = 'high'
-            risk_message = "High risk - take action immediately"
+    #  choose rolling window dynamically
+    mould_index, series, used_timeframe, full_data = process_mold_index(df)
+    risk_data = mould_score(mould_index, df)
+    #pass processed values to result template
+    context = {
+        'temperature': round(risk_data['current_temperature'], 1),
+        'humidity': round(risk_data['current_humidity'], 1),
+        'mould_index': round(risk_data['mould_index'], 1),
+        'risk_level': risk_data['risk_level'],
+        'risk_message': risk_data['status'],
+        'temp_status': 'good' if risk_data['current_temperature'] < 26 else 'warning',
+        'humidity_status': 'good' if risk_data['current_humidity'] < 60 else 'warning',
+        'risk_class': 'low' if risk_data['risk_level'].lower() == 'low'
+                      else 'medium' if risk_data['risk_level'].lower() == 'moderate'
+                      else 'high',
+        'used_timeframe': used_timeframe,
+        'progress_width': f"{round(risk_data['mould_index'])}%"
+    }
 
-        context = {
-            'temperature': f"{temperature:.1f}",
-            'humidity': f"{humidity:.1f}",
-            'mould_index': f"{mould_index:.2f}",
-            'temp_status': temp_status,
-            'temp_message': temp_message,
-            'humidity_status': humidity_status,
-            'humidity_message': humidity_message,
-            'risk_level': risk_level,
-            'risk_class': risk_class,
-            'risk_message': risk_message
-        }
-        
-        return render(request, 'result.html', context)
-    
-    return redirect('uploadpage')
+    return render(request, 'result.html', context)
 
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('dashboard')
+    else:
+        form = UserCreationForm()
+    return render(request, 'auth/register.html', {'form': form})
+
+
+@login_required
+def dashboard(request):
+    analyses = MouldAnalysis.objects.filter(user=request.user).order_by('-uploaded_at')
+    return render(request, 'dashboard.html', {'analyses': analyses})

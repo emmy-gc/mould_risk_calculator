@@ -1,47 +1,69 @@
 {% extends 'base.html' %}
-{% load static %}
-
-{% block title %}Results - Mould Calculator{% endblock %}
+{% block title %}Mould Risk Analysis Results{% endblock %}
 
 {% block content %}
-<div class="results-container">
-    <div class="results-card">
-        <div class="results-header">
-            <h1>Analysis Results</h1>
-            <p>Based on your uploaded data</p>
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <i class="bi bi-bar-chart-line text-primary" style="font-size: 2.5rem;"></i>
+            <h1 class="text-primary mb-2">Analysis Results</h1>
+            <p class="text-muted">Data analyzed for: <strong>{{ used_timeframe }}</strong></p>
         </div>
+    </div>
 
-        <div class="results-grid">
-            <div class="metric-card">
-                <h3>Temperature</h3>
-                <div class="metric-value">{{ temperature }}°C</div>
-                <div class="metric-status {{ temp_status }}">
-                    {{ temp_message }}
+
+    <!-- resultscards -->
+    <div class="row g-4 mb-4">
+        <!-- Temperature -->
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-thermometer-half text-primary" style="font-size: 2rem;"></i>
+                    <h5 class="card-title text-primary mt-2">Temperature</h5>
+                    <div class="display-6 mb-2">{{ temperature }} °C</div>
+                    <span class="badge bg-{{ temp_status|default:'secondary' }} fs-6">{{ temp_message }}</span>
                 </div>
-            </div>
-            <div class="metric-card">
-                <h3>Humidity</h3>
-                <div class="metric-value">{{ humidity }}%</div>
-                <div class="metric-status {{ humidity_status }}">
-                    {{ humidity_message }}
-                </div>
-            </div>
-            
-            <div class="metric-card risk-card">
-                <h3>Mould Risk Level</h3>
-                <div class="risk-level {{ risk_class }}">
-                    {{ risk_level }}
-                </div>
-                <div class="mould-index-value">
-                    Mould Index: {{ mould_index }}
-                </div>
-                <p class="risk-message">{{ risk_message }}</p>
             </div>
         </div>
 
-        <div class="action-buttons">
-            <a href="{% url 'uploadpage' %}" class="new-analysis-button">New Analysis</a>
+        <!--humidity -->
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-droplet-half text-primary" style="font-size: 2rem;"></i>
+                    <h5 class="card-title text-primary mt-2">Humidity</h5>
+                    <div class="display-6 mb-2">{{ humidity }}%</div>
+                    <span class="badge bg-{{ humidity_status|default:'secondary' }} fs-6">{{ humidity_message }}</span>
+                </div>
+            </div>
         </div>
+
+        <!--mould risk -->
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100 risk-card {{ risk_class }}">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                    <h5 class="card-title mt-2">Mould Risk Level</h5>
+                    <div class="display-6 mb-2">{{ risk_level }}</div>
+                    <div class="badge text-dark mb-2">Mould Index: {{ mould_index }}</div>
+                    <div class="small text-muted mb-3">{{ risk_message }}</div>
+                    <div class="progress mt-2" style="height: 20px;">
+                        <div class="progress-bar bg-{{ risk_class }}" role="progressbar"
+                             style="width: {{ progress_width }};"
+                             aria-valuenow="{{ mould_index }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ mould_index|floatformat:1 }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- nav -->
+    <div class="text-center">
+        <a href="{% url 'uploadpage' %}" class="btn btn-morph big-btn mt-3">
+            <i class="bi bi-arrow-repeat"></i> Run New Analysis
+        </a>
     </div>
 </div>
 {% endblock %}
