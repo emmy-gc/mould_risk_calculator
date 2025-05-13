@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+from decouple import config
+import dj_database_url
 
 from pathlib import Path
 import os
@@ -26,7 +28,7 @@ SECRET_KEY = 'django-insecure-5$i8*w3ud)(vq8!x_p1#+#$=x7urhu0)28zqm1vzw$_k_3g6xp
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -75,12 +77,10 @@ WSGI_APPLICATION = 'mould_risk_calculator.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+DATABASES = DATABASES = {
+    'default': dj_database_url.config(default=config('DATABASE_URL'))
 }
+
 
 
 # Password validation
